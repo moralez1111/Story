@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Story For You</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <div id="app">
+    <div id="camera-viewport">
+      
+      <!-- SCENE 1: NIGHT EXTERIOR -->
+      <div id="scene-exterior" class="scene active">
+        <div id="stars-layer"></div>
+        <div class="moon"></div>
+        
+        <!-- House -->
+        <div class="house" id="house-target">
+          <div class="roof"></div>
+          <div class="facade">
+            <div class="window" id="window-target">
+              <div class="frame-v"></div>
+              <div class="frame-h"></div>
+            </div>
+            <div class="door"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 2: INTERIOR / STORY -->
+      <div id="scene-interior" class="scene">
+        
+        <div id="stage-viewport">
+          <!-- ENVIRONMENT 1: COZY BEDROOM (NIGHT) -->
+          <div class="environment env-bedroom active" id="env-bedroom">
+            <div class="room-window">
+              <div class="mini-sky"><div class="mini-moon"></div></div>
+              <div class="curtain c-left"></div>
+              <div class="curtain c-right"></div>
+            </div>
+
+            <div class="shelf s-top">
+              <span class="prop">🪴</span>
+              <span class="prop">🖼️</span>
+              <div class="book b-purple"></div>
+            </div>
+            <div class="shelf s-bottom">
+              <div class="book b-pink"></div>
+              <div class="book b-blue"></div>
+              <span class="prop">🕯️</span>
+            </div>
+
+            <div class="desk">
+              <div class="laptop"><div class="screen"></div></div>
+              <div class="lamp"><div class="glow"></div></div>
+              <div class="surface"></div>
+            </div>
+
+            <div class="rug"></div>
+
+            <div class="bed">
+              <div class="headboard"></div>
+              <div class="mattress"></div>
+              <div class="pillow"></div>
+              <div class="blanket"></div>
+            </div>
+          </div>
+
+          <!-- ENVIRONMENT 2: MORNING SUNNY SKY -->
+          <div class="environment env-morning" id="env-morning">
+            <div class="sun"></div>
+            <div class="cloud c1">☁️</div>
+            <div class="cloud c2">☁️</div>
+            <div class="cloud c3">☁️</div>
+            <div class="hills"></div>
+          </div>
+
+          <!-- ENVIRONMENT 3: COZY DATE PLACE -->
+          <div class="environment env-date" id="env-date">
+            <div class="string-lights">
+              <div class="light"></div><div class="light"></div><div class="light"></div>
+              <div class="light"></div><div class="light"></div><div class="light"></div>
+            </div>
+            <div class="table">
+              <span class="prop">💐</span>
+              <span class="prop">🕯️</span>
+            </div>
+            <div class="date-rug"></div>
+          </div>
+
+          <!-- SHARED CHARACTER ELEMENT -->
+          <div id="character-wrapper" class="pos-bed-lying">
+            <div class="boy-character" id="boy-avatar">
+
+              <!-- Head & Exact Reference Hair Style -->
+              <div class="head">
+                <div class="hair-cut">
+                  <div class="anime-dome"></div>
+                  <div class="side-burn left-side"></div>
+                  <div class="side-burn right-side"></div>
+                  <div class="ahoge t1"></div>
+                  <div class="ahoge t2"></div>
+                </div>
+                <div class="eyes" id="boy-eyes"></div>
+                <div class="blush"></div>
+                <div class="mouth" id="boy-mouth"></div>
+              </div>
+
+              <!-- Upper Body / Outfit -->
+              <div class="torso sweater" id="boy-torso">
+                <div class="tie" id="boy-tie"></div>
+                <div class="arm arm-left"></div>
+                <div class="arm arm-right" id="boy-right-arm">
+                  <div class="hand"></div>
+                </div>
+              </div>
+
+              <!-- Cover Face Layer -->
+              <div class="hands-cover-face" id="hands-cover">
+                <div class="cover-hand"></div>
+                <div class="cover-hand"></div>
+              </div>
+
+              <!-- Lower Body -->
+              <div class="legs">
+                <div class="leg"></div>
+                <div class="leg"></div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Dialogue Bubble -->
+        <div class="dialogue-box" id="dialogue-box">
+          <p id="dialogue-text"></p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

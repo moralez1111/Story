@@ -2,149 +2,857 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>A Story For You</title>
-  <link rel="stylesheet" href="styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* RESET & BASE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Quicksand', sans-serif;
+      background-color: #070913;
+      color: #ffffff;
+    }
+
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* RESPONSIVE SCALER WRAPPER FOR MOBILE */
+    #app-scaler {
+      position: absolute;
+      width: 880px;
+      height: 540px;
+      transform-origin: center center;
+    }
+
+    #camera-viewport {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform-origin: 50% 50%;
+      transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .scene {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+
+    .scene.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ================= SCENE 1: EXTERIOR ================= */
+    #scene-exterior {
+      background: linear-gradient(180deg, #050711 0%, #10142a 60%, #1a1d3b 100%);
+    }
+
+    #stars-layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 50%;
+      animation: starPulse var(--dur) infinite ease-in-out alternate;
+    }
+
+    @keyframes starPulse {
+      0% { opacity: 0.2; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .shooting-star {
+      position: absolute;
+      width: 110px;
+      height: 2px;
+      background: linear-gradient(90deg, #ffffff, transparent);
+      animation: shootAnim 2.6s infinite ease-out;
+      pointer-events: none;
+    }
+
+    @keyframes shootAnim {
+      0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 1; }
+      100% { transform: translateX(-450px) translateY(315px) rotate(-35deg); opacity: 0; }
+    }
+
+    .moon {
+      position: absolute;
+      top: 10%;
+      right: 15%;
+      width: 80px;
+      height: 80px;
+      background: #fffde6;
+      border-radius: 50%;
+      box-shadow: 0 0 35px #fffde6, 0 0 80px rgba(255, 253, 230, 0.3);
+      pointer-events: none;
+    }
+
+    .house {
+      position: relative;
+      width: 290px;
+      height: 230px;
+      margin-top: 80px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      z-index: 5;
+    }
+
+    .house:hover {
+      transform: scale(1.02);
+    }
+
+    .roof {
+      width: 0; height: 0;
+      border-left: 165px solid transparent;
+      border-right: 165px solid transparent;
+      border-bottom: 100px solid #2d2547;
+      position: absolute;
+      top: -95px;
+      left: -20px;
+    }
+
+    .facade {
+      width: 100%;
+      height: 100%;
+      background: #1e1834;
+      border-radius: 8px;
+      border: 4px solid #100b20;
+      position: relative;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    }
+
+    .window {
+      position: absolute;
+      top: 35px;
+      left: 35px;
+      width: 80px;
+      height: 90px;
+      background: #ffd369;
+      border-radius: 10px;
+      border: 4px solid #100b20;
+      box-shadow: 0 0 40px #ffd369;
+    }
+
+    .frame-v { position: absolute; top: 0; left: 50%; width: 4px; height: 100%; background: #100b20; transform: translateX(-50%); }
+    .frame-h { position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: #100b20; transform: translateY(-50%); }
+
+    .door {
+      position: absolute;
+      bottom: 0;
+      right: 40px;
+      width: 58px;
+      height: 98px;
+      background: #382952;
+      border-radius: 6px 6px 0 0;
+      border: 3px solid #100b20;
+    }
+
+    /* ================= SCENE 2: INTERIOR STAGE ================= */
+    #stage-viewport {
+      position: relative;
+      width: 880px;
+      height: 540px;
+      background: #161226;
+      border-radius: 24px;
+      border: 6px solid #0d091a;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+      overflow: hidden;
+    }
+
+    .environment {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: translateX(100%);
+      transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+      pointer-events: none;
+    }
+
+    .environment.active {
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .environment.slide-out {
+      transform: translateX(-100%);
+    }
+
+    .env-bedroom {
+      background: linear-gradient(180deg, #251e3f 0%, #1c1630 70%, #140e24 100%);
+    }
+
+    .room-window {
+      position: absolute; top: 35px; left: 50px;
+      width: 130px; height: 150px;
+      border: 5px solid #382c57; border-radius: 14px;
+      overflow: hidden; background: #0a0c18;
+    }
+    .mini-sky { width: 100%; height: 100%; position: relative; }
+    .mini-moon {
+      position: absolute; top: 20px; right: 20px;
+      width: 28px; height: 28px; background: #fffde6;
+      border-radius: 50%; box-shadow: 0 0 12px #fffde6;
+    }
+
+    .curtain { position: absolute; top: 0; width: 30px; height: 100%; background: #e85d75; }
+    .c-left { left: 0; border-radius: 0 0 12px 0; }
+    .c-right { right: 0; border-radius: 0 0 0 12px; }
+
+    .shelf {
+      position: absolute; left: 220px; width: 150px; height: 10px;
+      background: #453766; border-radius: 4px;
+      display: flex; align-items: flex-end; gap: 10px; padding-left: 12px;
+    }
+    .s-top { top: 50px; }
+    .s-bottom { top: 130px; }
+    .prop { font-size: 1.3rem; }
+    .book { width: 14px; border-radius: 3px 3px 0 0; }
+    .b-purple { height: 32px; background: #9d4edd; }
+    .b-pink { height: 28px; background: #ff758c; }
+    .b-blue { height: 35px; background: #48cae4; }
+
+    .desk { position: absolute; bottom: 40px; left: 50px; width: 180px; height: 130px; }
+    .surface {
+      position: absolute; bottom: 0; width: 100%; height: 75px;
+      background: #3f335e; border-radius: 8px; border-top: 4px solid #504278;
+    }
+    .laptop {
+      position: absolute; bottom: 75px; left: 40px; width: 60px; height: 40px;
+      background: #25283a; border-radius: 6px; padding: 4px;
+    }
+    .screen { width: 100%; height: 100%; background: #70a1ff; border-radius: 4px; box-shadow: 0 0 15px #70a1ff; }
+    .lamp {
+      position: absolute; bottom: 75px; right: 20px; width: 25px; height: 45px;
+      border-right: 4px solid #ffd369; border-top: 4px solid #ffd369; border-radius: 0 10px 0 0;
+    }
+    .glow {
+      position: absolute; top: 30px; right: -25px; width: 60px; height: 60px;
+      background: radial-gradient(circle, rgba(255, 211, 105, 0.4) 0%, transparent 70%); border-radius: 50%;
+    }
+
+    .rug {
+      position: absolute; bottom: 30px; left: 320px; width: 460px; height: 90px;
+      background: #271f42; border-radius: 50px; border: 3px dashed #423467;
+    }
+
+    .bed { position: absolute; bottom: 40px; right: 60px; width: 360px; height: 210px; }
+    .headboard { position: absolute; left: 0; top: 0; width: 30px; height: 100%; background: #453022; border-radius: 10px; }
+    .mattress { position: absolute; left: 30px; bottom: 0; width: 330px; height: 150px; background: #33274e; border-radius: 12px; }
+    .pillow { position: absolute; left: 42px; top: 75px; width: 65px; height: 85px; background: #ffffff; border-radius: 14px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+    .blanket {
+      position: absolute; right: 0; bottom: 0; width: 240px; height: 140px;
+      background: #ff758c; border-radius: 20px 10px 10px 20px; box-shadow: -4px 0 15px rgba(0,0,0,0.2); z-index: 5;
+    }
+
+    .env-morning {
+      background: linear-gradient(180deg, #6cb2eb 0%, #9bc5fd 60%, #bee3f8 100%);
+    }
+    .sun {
+      position: absolute; top: 40px; right: 80px; width: 110px; height: 110px;
+      background: #fff3bf; border-radius: 50%; box-shadow: 0 0 50px #fff3bf;
+    }
+    .cloud { position: absolute; font-size: 4rem; opacity: 0.9; }
+    .c1 { top: 50px; left: 60px; animation: cloudFloat 8s infinite ease-in-out alternate; }
+    .c2 { top: 120px; left: 380px; animation: cloudFloat 6s infinite ease-in-out alternate-reverse; }
+    .c3 { top: 60px; right: 240px; animation: cloudFloat 7s infinite ease-in-out alternate; }
+
+    @keyframes cloudFloat { 0% { transform: translateX(0); } 100% { transform: translateX(25px); } }
+
+    .hills {
+      position: absolute; bottom: 0; width: 100%; height: 140px;
+      background: linear-gradient(180deg, #48bb78 0%, #2f855a 100%);
+      border-radius: 40% 40% 0 0 / 20px;
+    }
+
+    .env-date {
+      background: linear-gradient(180deg, #2b102a 0%, #7b1133 60%, #e63946 100%);
+    }
+    .string-lights {
+      position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-around;
+    }
+    .light {
+      width: 14px; height: 20px; background: #ffec99; border-radius: 50%;
+      box-shadow: 0 0 15px #ffec99; animation: lightBlink 1.5s infinite alternate;
+    }
+    .light:nth-child(even) { animation-delay: 0.75s; }
+
+    @keyframes lightBlink { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+
+    .table {
+      position: absolute; bottom: 60px; left: 100px; width: 180px; height: 120px;
+      background: #36221c; border-radius: 12px; border-top: 6px solid #4e3127;
+      display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding-top: 10px;
+    }
+    .date-rug {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      width: 500px; height: 90px; background: rgba(0, 0, 0, 0.25); border-radius: 50px;
+    }
+
+    /* ================= CHARACTER & ANIME REFERENCE HAIR STYLE ================= */
+    #character-wrapper {
+      position: absolute;
+      width: 120px;
+      height: 220px;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.7s cubic-bezier(0.34, 1.25, 0.64, 1);
+    }
+
+    #character-wrapper.pos-bedroom { left: 520px; bottom: 80px; transform: rotate(0deg) scale(1); }
+    #character-wrapper.pos-center { left: 380px; bottom: 80px; transform: rotate(0deg) scale(1); }
+    #character-wrapper.pos-bed-lying { left: 480px; bottom: 80px; transform: rotate(-90deg) scale(0.9); z-index: 4; }
+
+    .boy-character {
+      position: relative;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center;
+      animation: breathing 2.2s infinite ease-in-out alternate;
+    }
+
+    @keyframes breathing {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-6px); }
+    }
+
+    .boy-character .head {
+      position: relative;
+      width: 75px;
+      height: 75px;
+      background: #ffe0bd;
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    .hair-cut {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 92px;
+      height: 65px;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .anime-dome {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 84px;
+      height: 50px;
+      background: #25160a;
+      border-radius: 45px 45px 20px 20px;
+    }
+
+    .side-burn {
+      position: absolute;
+      background: #25160a;
+      width: 28px;
+      height: 48px;
+    }
+
+    .left-side {
+      top: 25px;
+      left: -2px;
+      border-radius: 10px 0 0 20px;
+      clip-path: polygon(100% 0, 100% 40%, 20% 100%, 0 80%, 30% 0);
+    }
+
+    .right-side {
+      top: 25px;
+      right: -2px;
+      border-radius: 0 10px 20px 0;
+      clip-path: polygon(0 0, 70% 0, 100% 80%, 80% 100%, 0 40%);
+    }
+
+    .ahoge {
+      position: absolute;
+      background: #25160a;
+      border-radius: 50%;
+    }
+
+    .ahoge.t1 {
+      width: 16px;
+      height: 22px;
+      top: -14px;
+      right: 22px;
+      transform: rotate(-25deg);
+      border-radius: 50% 50% 20% 50%;
+    }
+
+    .ahoge.t2 {
+      width: 12px;
+      height: 18px;
+      top: -10px;
+      right: 12px;
+      transform: rotate(15deg);
+      border-radius: 50% 50% 50% 20%;
+    }
+
+    .eyes {
+      position: absolute; top: 40px; left: 18px; width: 40px;
+      display: flex; justify-content: space-between;
+    }
+    .eyes::before, .eyes::after {
+      content: ''; width: 7px; height: 7px; background: #2b1a0e; border-radius: 50%;
+    }
+    .eyes.sad::before, .eyes.sad::after {
+      height: 3px; border-radius: 2px;
+    }
+
+    .blush {
+      position: absolute; top: 47px; left: 10px; width: 55px;
+      display: flex; justify-content: space-between;
+    }
+    .blush::before, .blush::after {
+      content: ''; width: 12px; height: 7px; background: rgba(255, 117, 140, 0.6); border-radius: 50%;
+    }
+
+    .mouth {
+      position: absolute; top: 48px; left: 32px; width: 10px; height: 6px;
+      border-bottom: 2px solid #5c3a21; border-radius: 0 0 10px 10px;
+    }
+    .mouth.worried {
+      border-bottom: none; border-top: 2px solid #5c3a21; border-radius: 10px 10px 0 0;
+    }
+
+    .torso {
+      position: relative; width: 60px; height: 65px;
+      background: #6c5ce7; border-radius: 16px 16px 8px 8px;
+      margin-top: -10px; z-index: 1; transition: background 0.4s ease;
+    }
+    .torso.suit { background: #2d3436; }
+
+    .tie {
+      display: none; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 8px; height: 25px; background: #e74c3c; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
+    }
+    .torso.suit .tie { display: block; }
+
+    .arm {
+      position: absolute; width: 16px; height: 48px;
+      background: inherit; border-radius: 8px; transform-origin: top center; transition: all 0.4s ease;
+    }
+    .arm-left { left: -10px; top: 4px; }
+    .arm-right { right: -10px; top: 4px; }
+    .hand { position: absolute; bottom: -4px; left: 2px; width: 12px; height: 12px; background: #ffe0bd; border-radius: 50%; }
+
+    .legs { display: flex; gap: 10px; margin-top: -4px; }
+    .leg { width: 18px; height: 50px; background: #2d3436; border-radius: 0 0 6px 6px; }
+
+    .boy-character.waving .arm-right { animation: waveAnim 0.7s infinite alternate ease-in-out; }
+    @keyframes waveAnim { 0% { transform: rotate(0deg); } 100% { transform: rotate(-120deg); } }
+
+    .boy-character.scratching .arm-right { animation: scratchAnim 0.5s infinite alternate ease-in-out; }
+    @keyframes scratchAnim { 0% { transform: rotate(-135deg); } 100% { transform: rotate(-155deg); } }
+
+    .hands-cover-face {
+      display: none; position: absolute; top: 25px; left: 50%; transform: translateX(-50%);
+      width: 70px; height: 40px; z-index: 6; justify-content: space-between;
+    }
+    .cover-hand { width: 30px; height: 35px; background: #ffe0bd; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+
+    .boy-character.hiding-face .hands-cover-face { display: flex; }
+    .boy-character.hiding-face .arm { opacity: 0; }
+
+    .dialogue-box {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(16, 12, 30, 0.95); border: 2px solid #ff758c;
+      padding: 16px 26px; border-radius: 22px; max-width: 520px; width: 85%;
+      text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      opacity: 0; pointer-events: none; transition: all 0.4s ease; z-index: 25;
+    }
+
+    .dialogue-box.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .dialogue-box p { font-size: 1.1rem; color: #ffffff; line-height: 1.45; font-weight: 600; }
+  </style>
 </head>
 <body>
 
   <div id="app">
-    <div id="camera-viewport">
-      
-      <!-- SCENE 1: NIGHT EXTERIOR -->
-      <div id="scene-exterior" class="scene active">
-        <div id="stars-layer"></div>
-        <div class="moon"></div>
+    <div id="app-scaler">
+      <div id="camera-viewport">
         
-        <!-- House -->
-        <div class="house" id="house-target">
-          <div class="roof"></div>
-          <div class="facade">
-            <div class="window" id="window-target">
-              <div class="frame-v"></div>
-              <div class="frame-h"></div>
+        <!-- SCENE 1: NIGHT EXTERIOR -->
+        <div id="scene-exterior" class="scene active">
+          <div id="stars-layer"></div>
+          <div class="moon"></div>
+          
+          <!-- House -->
+          <div class="house" id="house-target">
+            <div class="roof"></div>
+            <div class="facade">
+              <div class="window" id="window-target">
+                <div class="frame-v"></div>
+                <div class="frame-h"></div>
+              </div>
+              <div class="door"></div>
             </div>
-            <div class="door"></div>
           </div>
         </div>
-      </div>
 
-      <!-- SCENE 2: INTERIOR / STORY -->
-      <div id="scene-interior" class="scene">
-        
-        <div id="stage-viewport">
-          <!-- ENVIRONMENT 1: COZY BEDROOM (NIGHT) -->
-          <div class="environment env-bedroom active" id="env-bedroom">
-            <div class="room-window">
-              <div class="mini-sky"><div class="mini-moon"></div></div>
-              <div class="curtain c-left"></div>
-              <div class="curtain c-right"></div>
+        <!-- SCENE 2: INTERIOR / STORY -->
+        <div id="scene-interior" class="scene">
+          
+          <div id="stage-viewport">
+            <!-- ENVIRONMENT 1: COZY BEDROOM (NIGHT) -->
+            <div class="environment env-bedroom active" id="env-bedroom">
+              <div class="room-window">
+                <div class="mini-sky"><div class="mini-moon"></div></div>
+                <div class="curtain c-left"></div>
+                <div class="curtain c-right"></div>
+              </div>
+
+              <div class="shelf s-top">
+                <span class="prop">🪴</span>
+                <span class="prop">🖼️</span>
+                <div class="book b-purple"></div>
+              </div>
+              <div class="shelf s-bottom">
+                <div class="book b-pink"></div>
+                <div class="book b-blue"></div>
+                <span class="prop">🕯️</span>
+              </div>
+
+              <div class="desk">
+                <div class="laptop"><div class="screen"></div></div>
+                <div class="lamp"><div class="glow"></div></div>
+                <div class="surface"></div>
+              </div>
+
+              <div class="rug"></div>
+
+              <div class="bed">
+                <div class="headboard"></div>
+                <div class="mattress"></div>
+                <div class="pillow"></div>
+                <div class="blanket"></div>
+              </div>
             </div>
 
-            <div class="shelf s-top">
-              <span class="prop">🪴</span>
-              <span class="prop">🖼️</span>
-              <div class="book b-purple"></div>
-            </div>
-            <div class="shelf s-bottom">
-              <div class="book b-pink"></div>
-              <div class="book b-blue"></div>
-              <span class="prop">🕯️</span>
+            <!-- ENVIRONMENT 2: MORNING SUNNY SKY -->
+            <div class="environment env-morning" id="env-morning">
+              <div class="sun"></div>
+              <div class="cloud c1">☁️</div>
+              <div class="cloud c2">☁️</div>
+              <div class="cloud c3">☁️</div>
+              <div class="hills"></div>
             </div>
 
-            <div class="desk">
-              <div class="laptop"><div class="screen"></div></div>
-              <div class="lamp"><div class="glow"></div></div>
-              <div class="surface"></div>
+            <!-- ENVIRONMENT 3: COZY DATE PLACE -->
+            <div class="environment env-date" id="env-date">
+              <div class="string-lights">
+                <div class="light"></div><div class="light"></div><div class="light"></div>
+                <div class="light"></div><div class="light"></div><div class="light"></div>
+              </div>
+              <div class="table">
+                <span class="prop">💐</span>
+                <span class="prop">🕯️</span>
+              </div>
+              <div class="date-rug"></div>
             </div>
 
-            <div class="rug"></div>
+            <!-- SHARED CHARACTER ELEMENT -->
+            <div id="character-wrapper" class="pos-bed-lying">
+              <div class="boy-character" id="boy-avatar">
 
-            <div class="bed">
-              <div class="headboard"></div>
-              <div class="mattress"></div>
-              <div class="pillow"></div>
-              <div class="blanket"></div>
-            </div>
-          </div>
-
-          <!-- ENVIRONMENT 2: MORNING SUNNY SKY -->
-          <div class="environment env-morning" id="env-morning">
-            <div class="sun"></div>
-            <div class="cloud c1">☁️</div>
-            <div class="cloud c2">☁️</div>
-            <div class="cloud c3">☁️</div>
-            <div class="hills"></div>
-          </div>
-
-          <!-- ENVIRONMENT 3: COZY DATE PLACE -->
-          <div class="environment env-date" id="env-date">
-            <div class="string-lights">
-              <div class="light"></div><div class="light"></div><div class="light"></div>
-              <div class="light"></div><div class="light"></div><div class="light"></div>
-            </div>
-            <div class="table">
-              <span class="prop">💐</span>
-              <span class="prop">🕯️</span>
-            </div>
-            <div class="date-rug"></div>
-          </div>
-
-          <!-- SHARED CHARACTER ELEMENT -->
-          <div id="character-wrapper" class="pos-bed-lying">
-            <div class="boy-character" id="boy-avatar">
-
-              <!-- Head & Exact Reference Hair Style -->
-              <div class="head">
-                <div class="hair-cut">
-                  <div class="anime-dome"></div>
-                  <div class="side-burn left-side"></div>
-                  <div class="side-burn right-side"></div>
-                  <div class="ahoge t1"></div>
-                  <div class="ahoge t2"></div>
+                <!-- Head & Centered Hair -->
+                <div class="head">
+                  <div class="hair-cut">
+                    <div class="anime-dome"></div>
+                    <div class="side-burn left-side"></div>
+                    <div class="side-burn right-side"></div>
+                    <div class="ahoge t1"></div>
+                    <div class="ahoge t2"></div>
+                  </div>
+                  <div class="eyes" id="boy-eyes"></div>
+                  <div class="blush"></div>
+                  <div class="mouth" id="boy-mouth"></div>
                 </div>
-                <div class="eyes" id="boy-eyes"></div>
-                <div class="blush"></div>
-                <div class="mouth" id="boy-mouth"></div>
-              </div>
 
-              <!-- Upper Body / Outfit -->
-              <div class="torso sweater" id="boy-torso">
-                <div class="tie" id="boy-tie"></div>
-                <div class="arm arm-left"></div>
-                <div class="arm arm-right" id="boy-right-arm">
-                  <div class="hand"></div>
+                <!-- Upper Body / Outfit -->
+                <div class="torso sweater" id="boy-torso">
+                  <div class="tie" id="boy-tie"></div>
+                  <div class="arm arm-left"></div>
+                  <div class="arm arm-right" id="boy-right-arm">
+                    <div class="hand"></div>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Cover Face Layer -->
-              <div class="hands-cover-face" id="hands-cover">
-                <div class="cover-hand"></div>
-                <div class="cover-hand"></div>
-              </div>
+                <!-- Cover Face Layer -->
+                <div class="hands-cover-face" id="hands-cover">
+                  <div class="cover-hand"></div>
+                  <div class="cover-hand"></div>
+                </div>
 
-              <!-- Lower Body -->
-              <div class="legs">
-                <div class="leg"></div>
-                <div class="leg"></div>
-              </div>
+                <!-- Lower Body -->
+                <div class="legs">
+                  <div class="leg"></div>
+                  <div class="leg"></div>
+                </div>
 
+              </div>
             </div>
+
+          </div>
+
+          <!-- Dialogue Bubble -->
+          <div class="dialogue-box" id="dialogue-box">
+            <p id="dialogue-text"></p>
           </div>
 
         </div>
 
-        <!-- Dialogue Bubble -->
-        <div class="dialogue-box" id="dialogue-box">
-          <p id="dialogue-text"></p>
-        </div>
-
       </div>
-
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    // Auto-scale to fit any phone or screen size perfectly
+    function updateScale() {
+      const scaler = document.getElementById('app-scaler');
+      const baseWidth = 880;
+      const baseHeight = 540;
+      const scaleX = window.innerWidth / baseWidth;
+      const scaleY = window.innerHeight / baseHeight;
+      const scale = Math.min(scaleX, scaleY);
+      scaler.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', updateScale);
+    window.addEventListener('load', updateScale);
+    updateScale();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const cameraViewport = document.getElementById('camera-viewport');
+      const starsLayer = document.getElementById('stars-layer');
+      const houseTarget = document.getElementById('house-target');
+      const windowTarget = document.getElementById('window-target');
+      
+      const sceneExterior = document.getElementById('scene-exterior');
+      const sceneInterior = document.getElementById('scene-interior');
+
+      const envBedroom = document.getElementById('env-bedroom');
+      const envMorning = document.getElementById('env-morning');
+      const envDate = document.getElementById('env-date');
+
+      const characterWrapper = document.getElementById('character-wrapper');
+      const boyAvatar = document.getElementById('boy-avatar');
+      const boyEyes = document.getElementById('boy-eyes');
+      const boyMouth = document.getElementById('boy-mouth');
+      const boyTorso = document.getElementById('boy-torso');
+
+      const dialogueBox = document.getElementById('dialogue-box');
+      const dialogueText = document.getElementById('dialogue-text');
+
+      let isZooming = false;
+      let storyStep = 0;
+
+      for (let i = 0; i < 75; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 70}%`;
+        const sz = Math.random() * 3 + 1;
+        star.style.width = `${sz}px`;
+        star.style.height = `${sz}px`;
+        star.style.setProperty('--dur', `${Math.random() * 2 + 1}s`);
+        starsLayer.appendChild(star);
+      }
+
+      setInterval(() => {
+        const shootingStar = document.createElement('div');
+        shootingStar.className = 'shooting-star';
+        shootingStar.style.top = `${Math.random() * 40}%`;
+        shootingStar.style.right = `-100px`;
+        starsLayer.appendChild(shootingStar);
+
+        setTimeout(() => { shootingStar.remove(); }, 2600);
+      }, 4000);
+
+      houseTarget.addEventListener('click', () => {
+        if (isZooming || storyStep > 0) return;
+        isZooming = true;
+
+        const winRect = windowTarget.getBoundingClientRect();
+        const winCenterX = winRect.left + winRect.width / 2;
+        const winCenterY = winRect.top + winRect.height / 2;
+
+        const viewCenterX = window.innerWidth / 2;
+        const viewCenterY = window.innerHeight / 2;
+
+        const panX = (viewCenterX - winCenterX) * 4;
+        const panY = (viewCenterY - winCenterY) * 4;
+
+        cameraViewport.style.transform = `translate(${panX}px, ${panY}px) scale(4.8)`;
+
+        setTimeout(() => {
+          sceneExterior.classList.remove('active');
+          sceneInterior.classList.add('active');
+
+          cameraViewport.style.transition = 'none';
+          cameraViewport.style.transform = 'translate(0px, 0px) scale(1)';
+
+          setTimeout(() => {
+            cameraViewport.style.transition = 'transform 1.2s cubic-bezier(0.4, 0, 0.2, 1)';
+            isZooming = false;
+          }, 50);
+        }, 1100);
+      });
+
+      function transitionEnv(fromEnv, toEnv) {
+        fromEnv.classList.add('slide-out');
+        fromEnv.classList.remove('active');
+
+        setTimeout(() => {
+          fromEnv.classList.remove('slide-out');
+        }, 900);
+
+        toEnv.classList.add('active');
+      }
+
+      characterWrapper.addEventListener('click', () => {
+        storyStep++;
+
+        switch (storyStep) {
+          case 1:
+            characterWrapper.className = 'pos-bedroom';
+            boyAvatar.classList.add('waving');
+            dialogueText.innerText = "Good morning baby, I hope you slept well.";
+            dialogueBox.classList.add('show');
+            break;
+
+          case 2:
+            boyAvatar.classList.remove('waving');
+            boyAvatar.classList.add('scratching');
+            dialogueText.innerText = "I Have been thinking about you a lot, like I always do and I miss you so much.";
+            break;
+
+          case 3:
+            boyAvatar.classList.remove('scratching');
+            transitionEnv(envBedroom, envMorning);
+            characterWrapper.className = 'pos-center';
+
+            dialogueText.innerText = "you know I started a job and I thought everything would get better, but it created a new fear for me.";
+            break;
+
+          case 4:
+            boyAvatar.classList.add('hiding-face');
+            boyEyes.classList.add('sad');
+            boyMouth.classList.add('worried');
+
+            dialogueText.innerText = "It felt like I wont be able to keep up with you and I wont be able to be by your side.";
+            break;
+
+          case 5:
+            boyAvatar.classList.remove('hiding-face');
+            boyEyes.classList.remove('sad');
+            boyMouth.classList.remove('worried');
+            boyTorso.classList.add('suit');
+
+            transitionEnv(envMorning, envDate);
+
+            dialogueText.innerText = "on the other hand I will be able to treat you better and I will be able to make you more happy with dates, gifts, flowers ( I hope  ).";
+            break;
+
+          case 6:
+            dialogueText.innerText = "you deserve the best and I will make sure you have it all";
+            break;
+
+          case 7:
+            boyTorso.classList.remove('suit');
+            transitionEnv(envDate, envBedroom);
+            characterWrapper.className = 'pos-bedroom';
+
+            dialogueText.innerText = "I just want you to promise me one thing.";
+            break;
+
+          case 8:
+            dialogueText.innerText = "I dont know what will happen in the future";
+            break;
+
+          case 9:
+            dialogueText.innerText = "I dont know what I will do in the future";
+            break;
+
+          case 10:
+            dialogueText.innerText = "but I know no matter what I will always love you and choose you.";
+            break;
+
+          case 11:
+            dialogueText.innerText = "no matter what we will do or where we go";
+            break;
+
+          case 12:
+            dialogueText.innerText = "we decide and do everything together, no matter what";
+            break;
+
+          case 13:
+            dialogueText.innerText = "we choose each other no matter what";
+            break;
+
+          case 14:
+            dialogueText.innerText = "Can you promise me that?";
+            break;
+
+          case 15:
+            dialogueText.innerText = "I promise you that. I love you baby.";
+            break;
+
+          case 16:
+            characterWrapper.className = 'pos-bed-lying';
+            dialogueBox.classList.remove('show');
+            break;
+
+          case 17:
+            sceneInterior.classList.remove('active');
+            sceneExterior.classList.add('active');
+
+            setTimeout(() => {
+              characterWrapper.className = 'pos-bed-lying';
+              boyAvatar.className = 'boy-character';
+              envBedroom.className = 'environment env-bedroom active';
+              envMorning.className = 'environment env-morning';
+              envDate.className = 'environment env-date';
+              storyStep = 0;
+            }, 1000);
+            break;
+        }
+      });
+    });
+  </script>
 </body>
 </html>
